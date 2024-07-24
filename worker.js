@@ -63,18 +63,29 @@ function convert_to_ss(parsed_conf) {
 }
 
 function convert_to_vmess(parsed_conf) {
+  let parsedServerInfo = parsed_conf.address.split(";")
+  let parsedServerHost = parsedServerInfo[5].split("|")
+  let convHost = parsedServerInfo[0]
+  for (let eachHost of parsedServerHost) {
+    if (eachHost.split("server=").length === 2) {
+      convHost = eachHost.split("server=")[1]
+      break
+    }
+  }
+  
   let conf = {
     v: "2",
     ps: parsed_conf.name,
-    add: parsed_conf.server,
-    port: parsed_conf.port,
+    add: convHost,
+    port: parsedServerInfo[1] ? parsedServerInfo[1] : parsed_conf.port,
     id: parsed_conf.uuid,
     aid: parsed_conf.alterId,
     net: parsed_conf.network,
     type: "none",
     host: parsed_conf.host,
-    path: parsed_conf.path,
-    tls: parsed_conf.tls
+    path: parsed_conf.network === "grpc" ? parsed_conf.servicename : parsed_conf.path,
+    servicename: parsed_conf.servicename,
+    tls: parsed_conf.security
   }
   return btoa(ascii_safe_json_encode(conf))
 }
